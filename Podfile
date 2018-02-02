@@ -9,6 +9,9 @@ target 'Oddesy' do
   pod 'SDWebImage', '~> 4.0'
   pod 'Alamofire', '~> 4.5'
   pod 'RealmSwift'
+  pod 'RxSwift',    '~> 4.0'
+  pod 'RxCocoa',    '~> 4.0'
+
   target 'OddesyTests' do
     inherit! :search_paths
     # Pods for testing

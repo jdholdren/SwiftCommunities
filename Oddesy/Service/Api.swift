@@ -9,13 +9,14 @@
 import Foundation
 import Alamofire
 import RealmSwift
+import RxSwift
 
 public struct Base {
     static let index = "/index.json"
 }
 
 protocol BatteriiApi {
-    func fetchIndex(name: String, complete: @escaping ( _ success: Bool, _ error: NSError? )->())
+    func fetchIndex(name: String) -> Observable<Bool>
 }
 
 class Api : BatteriiApi{
@@ -26,26 +27,31 @@ class Api : BatteriiApi{
         self.decoder = JSONDecoder()
     }
 
-    func fetchIndex(name: String, complete: @escaping (Bool, NSError?) -> ()) {
-        
-        let trimmedName = name.trimmingCharacters(in: .whitespaces)
-        
-        let url = "https://" + trimmedName + ".batterii.com" + Base.index
-        
-        Alamofire.request(url).validate().responseData { dataResponse in
+    func fetchIndex(name: String) -> Observable<Bool> {
+        return Observable.create { observer in
+            let trimmedName = name.trimmingCharacters(in: .whitespaces)
             
-            do{
-                let indexResponse = try self.decoder.decode(IndexResponse.self, from: dataResponse.data!)
+            let url = "https://" + trimmedName + ".batterii.com" + Base.index
+            
+            Alamofire.request(url).validate().responseData { dataResponse in
                 
-                let realm = try! Realm()
-                
-                try! realm.write {
-                    realm.add(indexResponse.community, update: true)
+                do{
+                    let indexResponse = try self.decoder.decode(IndexResponse.self, from: dataResponse.data!)
+                    
+                    let realm = try! Realm()
+                    
+                    try! realm.write {
+                        realm.add(indexResponse.community, update: true)
+                    }
+                    
+                    observer.onNext(true)
+                    observer.onCompleted()
+                }catch let error{
+                    observer.onError(error)
                 }
-                complete(true, nil)
-            }catch let error{
-                complete(false, error as NSError)
             }
+            
+            return Disposables.create()
         }
     }
  

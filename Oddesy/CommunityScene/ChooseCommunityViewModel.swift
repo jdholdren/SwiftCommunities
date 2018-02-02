@@ -8,6 +8,7 @@
 
 import Foundation
 import RealmSwift
+import RxSwift
 
 class ChooseCommunityViewModel{
     
@@ -18,6 +19,8 @@ class ChooseCommunityViewModel{
     let communities : Results<Community>
     
     let realm : Realm
+    
+    let bag: DisposeBag
     
     var notificationToken: NotificationToken? = nil
     
@@ -48,6 +51,7 @@ class ChooseCommunityViewModel{
     init(api: Api, communitiesListener: RealmCollectionListener){
         self.api = api
         self.communitiesListener = communitiesListener
+        self.bag = DisposeBag()
         
         self.realm = try! Realm()
         
@@ -74,13 +78,20 @@ class ChooseCommunityViewModel{
     func fetchIndex(communityName: String){
         self.isLoading = true
     
-        api.fetchIndex(name: communityName) { [weak self] (success, error) in
-            self?.isLoading = false
-            
-            if(error != nil){
-                self?.alertMessage = error?.localizedDescription
-            }
-        }
+        api.fetchIndex(name: communityName)
+            .subscribe({ [weak self] (event) in
+                switch event {
+                case .next:
+                    self?.isLoading = false
+                case .error:
+                    self?.isLoading = false
+                    self?.alertMessage = event.error?.localizedDescription
+                    break
+                case .completed:
+                    break
+                }
+            })
+            .disposed(by: self.bag)
     }
     
     // delete the community, our change listener will take care of updating the tableview accordingly

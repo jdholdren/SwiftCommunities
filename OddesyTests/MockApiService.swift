@@ -4,10 +4,19 @@
 //
 
 import Foundation
+import RxSwift
 
 @testable import Oddesy
 
 class MockApiService : BatteriiApi{
+    
+    
+    func fetchIndex(name: String) -> Observable<Bool> {
+        return Observable.create { observer in
+            return Disposables.create()
+        }
+    }
+    
 
     var isCommunityFetchCalled = false
     var fetchedCommunity : Community?
