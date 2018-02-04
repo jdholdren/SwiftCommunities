@@ -16,7 +16,7 @@ class ViewController: MVVMViewController {
     @IBOutlet weak var tableView: UITableView!
     
     lazy var viewModel: ChooseCommunityViewModel = {
-        return ChooseCommunityViewModel(api:Api(), communitiesListener: self)
+        return ChooseCommunityViewModel(api:Api(), communitiesListener: self, wrapper: SchedulerWrapper.instance)
     }()
     
     override func initViewModel() {

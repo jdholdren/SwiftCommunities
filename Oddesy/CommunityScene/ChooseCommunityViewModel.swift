@@ -16,6 +16,8 @@ class ChooseCommunityViewModel{
     
     let communitiesListener : RealmCollectionListener
     
+    let wrapper: ExecutionWrapper
+    
     let communities : Results<Community>
     
     let realm : Realm
@@ -48,9 +50,12 @@ class ChooseCommunityViewModel{
     // binding for alert closure
     var showAlertBinding: (()-> ())?
     
-    init(api: Api, communitiesListener: RealmCollectionListener){
+    init(api: Api, communitiesListener: RealmCollectionListener, wrapper: ExecutionWrapper){
         self.api = api
         self.communitiesListener = communitiesListener
+        self.wrapper = wrapper
+        
+        // For Rx Disposal
         self.bag = DisposeBag()
         
         self.realm = try! Realm()
@@ -78,7 +83,7 @@ class ChooseCommunityViewModel{
     func fetchIndex(communityName: String){
         self.isLoading = true
     
-        api.fetchIndex(name: communityName)
+        self.wrapper.wrap(obs: api.fetchIndex(name: communityName))
             .subscribe({ [weak self] (event) in
                 switch event {
                 case .next:

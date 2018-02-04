@@ -6,8 +6,6 @@
 import Foundation
 import RxSwift
 
-@testable import Oddesy
-
 class MockApiService : BatteriiApi{
     
     
